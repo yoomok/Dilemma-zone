@@ -1,0 +1,232 @@
+🎓 평가란...??
+머신러닝의 프로세스를 간단하게 살펴 보면 데이터 가공/변환, 모델 학습/예측, 그리고 평가(Evaluation)으로 구성이된다. 데이터를 가공하고 변환시켜서 이것을 모델에 넣어 학습을 하고 예측을 하는것 모두 중요하다 하지만 이러한 과정들이 잘 되고있는지 확인하기 위해서 혹은, 최종적으로 사용하기 위해서는 평가를 통해서 모델의 예측성능을 확인해야한다.
+
+일반적으로 성능 평가 지표는 회귀의 경우 실제값과 예측값의 오차 평균값에 기반한다.
+예를 들어 MAE, MSE가 있다. 이에 대해서는 회귀 모델에서 다룰것이다.
+
+분류의 평가 방법에는 이 데이터가 얼마나 정확하고 오류가 적게 발생하는가에 기반하지만, 단순히 이러한 정확도(accuracy)만으로 판단했다가는 잘못된 평가 결과에 빠질 수 있다. 특히 0과 1, 긍정 과 부정을 판단하는 이진분류에서는 다른평가 지표가 더 중요시 되는경우가 많다.
+
+그리고 정확도(accuracy)는 불균형(imbalanced)한 레이블 값 분포에서 모델의 성능을 판단할 때 적합하지 않다.
+
+그래서 우리는 여러가지 방법을 다양하게 활용해야한다.
+그 방법들을 다루어 볼 것이고 아래 방법의 순서로 진행할 것이다.
+
+정확도(accuracy)
+오차행렬(Confusion Matrix)
+정밀도(Precision)
+재현율(Recall)
+F1스코어
+정확도(Accuracy)
+정확도는 실제 데이터에서 예측 데이터가 얼마나 같은지를 판단하는 지표이다.
+
+정확도(Accuracy) = (예측 결과가 동일한 데이터 건수) / (전체 예측 데이터 건수)
+정확도는 직관적으로 모델 예측 성능을 나타내는 평가 지표이다. 하지만 이진 분류의 경우 데이터의 구성에 따라 모델 성능을 왜곡할 수 있기 때문에 정확도 수치 하나만 가지고 성능을 평가하지 않는다.
+
+예를 들어 캐글(Kaggle)의 타이타닉(Titanic)데이터 로 비유를 해보겠다.
+
+먼저 성별(Sex)에 따라 남성은 생존할 확률 30% 여성이 생존할 확률 70% 라고 했을때
+정확도를 사용하게 무조건 여성이 생존할 확률에 투표를 한다고 해도 70%의 성능이 나오게된다. 이는 바람직하지 않는 지표라는 것을 바로 알 수 있다.
+
+따라서 우리는 이렇게 이진분류인 데이터 특히, 불균형(imbalanced)한 레이블 값 분포의 경우 accuracy로 성능을 확인하는것은 올바르지 않다.
+
+오차행렬(confusion matrix)
+이진 분류에서 성능 지표로서 잘 활용되는 오차행렬은 분류 모델이 얼마나 헷갈리고(confused)있는지도 함께 보여주는 지표이다. 즉, 이진 분류에서 예측 오류가 얼마인지와 더불어 어떠한 유형의 예측오류가 발생하고 있는지를 함께 나타내는 지표이다.
+
+분류문제에서는 반드시 confusion matrix를 출력해서 결과를해석하고 설명해야한다.(습관화 하기!!)
+
+
+
+이미지 출처: https://rueki.tistory.com/66
+위의 그림은 실제 레이블 클래스 값과 예측 레이블 클래스 값이 어떠한 유형을 가지고 매핑이 되는지를 나타내는 표 이다. 실제값이 positive인지 negative인지와 예측값이 positive인지 negative인지를 나태내고 있다.
+
+T는 True를 의미하며, F는 False를 의미한다. / True는 예측값과 실제값이 같은것이며, False는 예측값과 실제값이 다름을 의미한다
+P는 Positive를 의미하며, N은 Negative를 의미한다. /즉, 예측값이 부정(0),긍정(1)을 의미한다.
+from sklearn.metrics import confusion_matrix
+
+confusion_matrix(y_test, pred)
+정밀도(Precision)와 재현율(Recall)
+먼저 앞에서 언급한 정확도를 오차행렬로 표현을 하면  
+Total
+TP+TN
+​
+  이러한 수식이 된다.
+
+그렇다면 정밀도와 재현율은 어떻게 이루어져 있을까
+
+정밀도(Precision) : Positive로 예측한 경우 중 실제로 Positive인 비율이다, 즉 예측값이 얼마나 정확한가 입니다.:  
+TP+FP
+TP
+​
+ 
+
+재현율(Recall) : 실제 Positive인 것 중 올바르게 Positive를 맞춘 것의 비율 이다다, 즉 실제 정답을 얼마나 맞췄느냐라고 생각하시면 됩니다
+
+출처: https://deepinsight.tistory.com/173 [Steve-Lee's Deep Insight]:  
+TP+FN
+TP
+​
+ , 민감도(Sensitivity) 혹은 TPR(True Positive Rate)이라고도 불린다.
+
+이해를 돕기 위해 예를 들어보았다.
+
+암 검사를 위해 병원을 찾아온 사람에게 암여부를 예측할때에는 재현율이 중요하다, 즉 실제로 암인데 암이 아니라고 예측하면 큰일나기 때문이다.
+
+메일이 왔는데 스팸메일여부를 판단하는 것은 정밀도가 중요하다.
+
+이렇듯 어떤것에 사용하느냐에 따라 달라지며 대부분은 재현율이 더 중요해 많이 사용하고 있다.
+
+그렇다면 정밀도(Precision)과 재현율(Recall)을 구하는 방법을 알아보겠다.
+
+사이킷런은 정밀도 계산을 위해서 precision_score()를, 재현율 계산을 위해 recall_score()를 API로 제공한다.
+
+sklearn.metrics.classification_report 를 사용하면 정밀도, 재현율을 한번에 확인할 수 있다.
+from sklearn.metrics import classification_report
+print(classification_report(y_val, y_pred))
+>>>
+              precision    recall  f1-score   support
+
+           0       0.76      0.80      0.78      7680
+           1       0.75      0.70      0.72      6372
+
+    accuracy                           0.75     14052
+   macro avg       0.75      0.75      0.75     14052
+weighted avg       0.75      0.75      0.75     14052
+위의 classification_report를 해석해 보겠습니다.
+먼저 모델의 정확도(accuracy)는 0.75%로 괜찮은 성능을 가진것을 볼 수있습니다.
+하지만 만약 imbalance한 데이터라면 f1-score를 확인해 주어야 합니다.
+f1score의 경우 macro avg와 weighted avg 이렇게 두가지가 있습니다.
+먼저, macro avg 는 단순평균값이며, weighted avg 는 각 클래스에 속하는 표본의 갯수로 가중평균값을 뜻합니다. 이 둘의f1-score와 accuracy가 차이가 없는것으로 보아 모델은 balance한 모델인것 같고 accuracy로 사용해도 괜찮을것 같습니다.
+
+정밀도/재현율 트레이드오프
+앞서 말한것 처럼 업무의 특성상 정밀도 또는 재현율이 특별히 강조돼야 할 경우가 있는데 이때는 임계값을 조정해 정밀도 또는 재현율을 높일 수 있다. 하지만 정밀도와 재현율은 상호 보완적인 평가 지표이기 때문에 어느 한쪽을 높이면 다른 한쪽은 줄어들게 된다. 이를 정밀도/재현율의 트레이드 오프 라고 부른다.
+
+여기서 임계값이란 만약 백신을 맞은 사람을 1 아닌사람을 0으로 해서 예측을 하는데 있어서 각각의 0과 1은 확률을 가지고있다.
+
+예를 들어 predict(X_val) 코드를 사용하게 되면
+X의 validation에 대해 y의 validation값이 나오는데 이는 0과 1로 나오게된다 하지만 이것은 0이나올 확률이 높아서 0, 1이 나올 확률이 높아서 1이라고 분류가 된것이다.
+
+따라서 코드를 살짝 바꿔서 predict_proba(X_val)이라는 코들르 사용하게 되면
+
+array([[0.46      , 0.54      ],
+       [0.85      , 0.15      ],
+       [0.78      , 0.22      ],
+       ...,
+       [0.14      , 0.86      ],
+       [0.38459524, 0.61540476],
+       [0.92      , 0.08      ]])
+위와 같이 데이터 별로 왼쪽은0이 될 확률, 오른쪽은 1이 될 확률로 출력이 된다.
+
+이때 이 0과 1로 분류하는것의 기준을 임계값이라고 하며 이 임계값은 기본적으로 0.5로 설정되어있다. 즉, 0.5이상이면 1이고 아니면 0이 된다.
+
+그런데 만약에 임계값을 0.3으로 설정했다고 생각해 보자
+그러면 0.3도 1로 예측한다 즉, 백신접종으로 모델은 예측하게 된다. 이는 재현율은 상승하게된다, 하지만 반대로 정밀도는 낮아진다. 왜냐하면 0.3과 0.4는 0.5로 임계값을 설정했을때와 비교했을때 0으로 예측할 확률이 높은데 이를 1로 예측하도록 임계값을 설정해 주었으니 정밀도(1이라고 예측했을때 실제값이 1이 나올확률)가 줄어들게 되는것이다.
+
+따라서 적절한 임계값을 찾아서 정밀도와 재현율을 효율적으로 만들어야한다.
+
+이때 등장하는것이 ROC-curve와 AUC이다.
+
+F1-Score
+F1 Score는 Precision과 Recall의 조화평균으로 주로 분류 클래스 간의 데이터가 불균형이 심각할때 사용한다.
+
+앞에서 배운 정확도의 경우, 데이터 분류 클래스가 균일하지 못하면 머신러닝 성능을 제대로 나타낼 수 없기 때문에 F1 Score를 사용한다.
+
+F1 Score는 정밀도와 재현율의 조화평균이다.
+
+2⋅ 
+precision+recall
+precision⋅recall
+​
+ 
+
+높을수록 좋은 모델이다.
+
+from sklearn.metrics import f1_score
+pred = pipe.predict(X_test)
+f1 = f1_score(y_test, pred)
+ROC-curve 와 AUC
+ROC-curve와 AUC를 사용하면 분류문제에서 여러 임계값 설정에 대한 모델의 성능을 구할 수 있게 된다.
+ROC curve는 여러 임계값에 대해 TPR과 FPR그래프를 보여준다.
+
+TPR = Recall(재현율) = TPR= 
+P
+TP
+​
+ = 
+TP+FN
+TP
+​
+ =1−FNR
+
+FPR = 위양성률 = FPR= 
+N
+FP
+​
+ = 
+FP+TN
+FP
+​
+ =1−TNR(Specificity)
+
+여기서 FPR이 왜 나오는지 살펴보면 우리는 최적의 임계값을 구해야 하는 상황에 있다. 실제값이 positive인데 예측값도 positive가 나오는 값과 실제값은 negative이지만 positive로 판단하는 경우도 있을것이다.
+
+재현율과 정밀도 이야기 했던 곳으로 다시 돌아가 보면
+임계값을 낮출 수록 TPR(재현율)이 올라가는 것을 확인했었다. 하지만 이렇게 임계값이 낮아지게 되면(임계점이 0.3) 0.3의 확률로 백신을 맞을 사람 즉, 이사람은 백신을 안맞을 사람인데 맞다고 예측하는경우(실제는 negative이지만 positive로 판단하는경우)역시 늘어나게 된다. 따라서 이 두가지 경우가 적절한 임계값을 찾아야 하기 때문에 위양성률(FPR)이 나오게 되었다.
+
+사이킷런에서 roc_curve는 임계값에 따른 TPR, FPR수치를 자동으로 계산해 준다.
+
+from sklearn.metrics import roc_curve
+
+# roc_curve(타겟값, prob of 1)
+fpr, tpr, thresholds = roc_curve(y_val, y_pred_proba)
+
+roc = pd.DataFrame({
+    'FPR(Fall-out)': fpr, 
+    'TPRate(Recall)': tpr, 
+    'Threshold': thresholds
+})
+roc
+
+>>>
+FPR(Fall-out)	TPRate(Recall)	Threshold
+0	0.000000	0.000000	2.0000
+1	0.000130	0.003766	1.0000
+2	0.000391	0.009416	0.9900
+3	0.000391	0.009730	0.9850
+4	0.001042	0.016478	0.9800
+이런식으로 임계값에 따라 TPR과 FPR이 출력이 되는 것을 볼 수있다.
+
+이것을 시각화 해보겠다.
+
+
+
+시각화 를 보면 FPR(negative이지만 positive로 예측한경우)이 올라갈때 TPR(실제값이 positive인데 positive로 예측한값)이 올라가는것을 볼 수있다.
+
+이제 이것을 바탕으로 최적의 threshold(임계값)을 찾아보겠다.
+
+# threshold 최대값의 인덱스, np.argmax()
+optimal_idx = np.argmax(tpr - fpr)
+optimal_threshold = thresholds[optimal_idx]
+
+print('idx:', optimal_idx, ', threshold:', optimal_threshold)
+
+>>>idx: 256 , threshold: 0.4633333333333334
+최적의 임계값이 0.46333...이 나온것이 출력이 되었다.
+
+이 값으로 최종 test값을 확인해보자
+
+predict =  (pipe.predict_proba(X_test)[:,1] >= optimal_threshold)
+# 1의 예측값만 불러와도 되므로 [:,1]사용
+predict = predict.astype(int)
+predict
+이후 predict값을 최종 결과값과 비교하면 과정이 끝나게 된다.
+
+이렇게해서 모델이후에 ROC곡선으로 최종 임계값을 조정해주어 더 좋은 예측을 위한 단계를 경험해보았다.
+
+AUC
+마지막으로 AUC점수를 계산해 보았다.
+
+AUC값은 ROC곡선 밑의 면적을 구한 것으로 일반적으로 1에 가까울수록 좋은 수치이고, 0.5에 가까울수록 학습이 제대로 이루어지지 않은 모델입니다. AUC가 커지려면 FPR이 작은상태에서 얼마나 큰 TPR을 얻을수 있느냐가 관건이다.즉 가욷네 직선에서 멀어지고 왼쪽 상단 모서리쪽으로 가파르게 올라갈 수록 면적이 1에 가까워지는 좋은모델이 된다.
+from sklearn.metrics import roc_auc_score
+
+pred_proba = lr_clf.predict_proba(X_test)[:,1]
+roc_score = roc_auc_score(y_test, pred_proba)
